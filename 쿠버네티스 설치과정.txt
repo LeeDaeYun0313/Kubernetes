@@ -10,6 +10,14 @@ Unique hostname, MAC address, and product_uuid for every node. See here for more
 Certain ports are open on your machines. See here for more details.
 Swap disabled. You MUST disable swap in order for the kubelet to work properly.
 
+sudo yum update -y
+sudo yum install docker -y
+sudo systemctl start docker
+sudo systemctl enable docker
+
+vi /etc/hosts 가서 master추가  node들은 node로
+hostnamectl set-hostname master
+
 # Disable firewall
 systemctl stop firewalld 
 systemctl disable firewalld
