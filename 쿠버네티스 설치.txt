@@ -27,6 +27,15 @@ sudo yum install docker-ce docker-ce-cli containerd.io -y
 systemctl start docker
 systemctl enable docker
 
+# aws linux2이면 아래 명령어로 도커설치 완료
+sudo yum update -y
+sudo yum install docker -y
+sudo systemctl start docker
+sudo systemctl enable docker
+
+
+
+
 cat <<EOF | sudo tee /etc/docker/daemon.json
 {
   "exec-opts": ["native.cgroupdriver=systemd"],
