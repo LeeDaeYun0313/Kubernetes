@@ -71,6 +71,7 @@ sudo systemctl enable --now kubelet
 ----------------------------------여기까지--------------
 마스터에서만 실행 
 kubeadm init     
+하고나서 나오는 kubeadm join ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 를 cat > token.txt 에 복사해서 저장 이값은 node들에게 실행시킬 것임
 
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -80,6 +81,7 @@ kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl versio
 
 
 ---------------------위에꺼 5줄 다 마스터에서만----
+
 kubeadm join 10.0.0.10:6443 --token q6lzwt.4ylxroix0iqhuyb5 \
 	--discovery-token-ca-cert-hash sha256:78ee85d8a6ea3097e62719bc3a217c88a72a5e4ef5a729359bb7ba7be93bba26
 
