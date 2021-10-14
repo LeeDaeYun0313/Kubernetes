@@ -98,7 +98,7 @@ yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 
 sudo systemctl enable --now kubelet
 
-
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ여기서 부터 마스터한테만 적용 ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 5. Install a single control-plane Kubernetes cluster
 # 어떤 CNI?
 # Create a single-host Kubernetes cluster
@@ -115,7 +115,8 @@ mkdir -p $HOME/.kube
 cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 chown $(id -u):$(id -g) $HOME/.kube/config
 
-## token 별도로 저장
+## token 별도로 저장  
+kubeadm join 10.0.0.159:6443 --token e1r22p.8wfbgvh024bptt0l --discovery-token-ca-cert-hash sha256:0b25cc3e23c9ab276004806b2ff76d1177afd043f408e3e1a7f1fff81cdf6e85  이런형식의 글  노드에 넣으면 마스터랑 연동됨
 cat > token.txt
 kubeadm init 명령 시 출력된 토큰을 저장해서 이후에 worker node들이 join할 때 사용
 
@@ -124,7 +125,7 @@ Installing a Pod network add-on
 #CNI - weave
 kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 kubectl get nodes
-
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ여기까지 마스터에게 적용ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 
 6. Worker Nodes Join
 ## worker nodes
