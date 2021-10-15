@@ -1,0 +1,59 @@
+도커에서는 docker run --name webserver -p 80:80 httpd 이렇게했음 도커 커멘드
+
+httpd라는 컨테이너를 pod 생성 / 실행 
+
+1.CLI : kubectl run webserver --image=httpd --port 80
+2.yml,yaml : kubectl apply -f pod-httpd.yaml //현업에서는 CLI보다 yaml을 많이 쓴다 보기가 쉽고 직관적이고 관리용이 해서.
+kubectl create -f pod-httpd.yaml  //pod-httpd.yaml 파일이 있어야함
+
+kubectl run webserver --image=httpd --port 80 --dry-run -o yaml
+// --dry-run 은 그냥 만들지는말고 되는지만 알려줘 라는 느낌 -o yaml해서 이커맨드의 yaml파일형식을 알려준다
+kubectl run webserver --image=httpd --port 80 --dry-run -o yaml >pod-httpd.yaml 하면 yaml파일 생성
+
+.yaml파일
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: webserver
+  name: webserver
+spec:
+  containers:
+  - image: httpd
+    name: webserver
+    ports:
+    - containerPort: 80
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+위에 yaml파일을 줄여쓰면
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webserver-1
+spec:
+  containers:
+  - image: httpd
+    name: webserver
+    ports:
+    - containerPort: 80
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+kubectl get pod -o wide
+
+NAME        READY   STATUS    RESTARTS   AGE     IP          NODE                NOMINATED NODE   READINESS GATES
+webserver   1/1     Running   0          4m56s   10.36.0.1   doker.example.com   <none>           <none>
+
+READY에서 1/1은 하나의 POD안에 컨테이너 한개가 들어가있다는 뜻
+2/2이면 하나의 POD안에 2개의 컨테이너가 있다는 뜻
+
+노드이름이 docker에서 실행된 ip:10.36.0.1을가진 pod
+
+kubectl delete pod webserver(pod이름) 하면 pod 삭제
+
+
