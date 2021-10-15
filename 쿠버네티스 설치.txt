@@ -77,12 +77,11 @@ mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
-
-
 ---------------------위에꺼 5줄 다 마스터에서만----
 node1,2에  kubeadm reset 한번하고 보안그룹수정해서 tcp 0-65535 에 리소스값은 vpc의 ip로 넣으면됩니다
 그후
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+
 kubeadm join 10.0.0.10:6443 --token q6lzwt.xxxxxxxxxxxx \
 	--discovery-token-ca-cert-hash sha256:78ee85d8a6xxxxxxxxxxxxxxxxxx5a729359bb7ba7be93bba26
 
