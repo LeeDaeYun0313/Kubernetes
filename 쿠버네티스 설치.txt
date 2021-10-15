@@ -87,3 +87,18 @@ kubeadm join 10.0.0.10:6443 --token q6lzwt.xxxxxxxxxxxx \
 	--discovery-token-ca-cert-hash sha256:78ee85d8a6xxxxxxxxxxxxxxxxxx5a729359bb7ba7be93bba26
 
 <<위에 줄 node1,2 에다가 붙이기
+
+7. kubectl command 자동완성 기능 추가
+yum install -y  bash-completion
+source /usr/share/bash-completion/bash_completion
+
+source <(kubectl completion bash)
+echo "source <(kubectl completion bash)" >> ~/.bashrc
+<<위에 2줄 한번에 복사  의미는 kubectl 명령어 자동완성 기능 활성화 
+
+
+8. 설치확인
+kubectl get nodes
+kubectl get nodes -o wide
+kubectl describe node node1.example.com
+kubectl get pod --all-namespaces
