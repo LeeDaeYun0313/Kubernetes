@@ -56,4 +56,17 @@ READY에서 1/1은 하나의 POD안에 컨테이너 한개가 들어가있다는
 
 kubectl delete pod webserver(pod이름) 하면 pod 삭제
 
+kubectl describe pod webserver(파드이름) //동작중인 파드 정보 자세히보기
+kubectl edit pod webserver(파드이름) // 동작중인 파드 수정
+kubectl delete pod webserver // 동작중인 파드 삭제
+kubectl logs webserver // 파드내 컨테이너 로그보기
+kubectl exec -it webserver -- /bin/bash // 동작중인 파드로 연결
+
+
+pod랑 deployment는 다른것임 !!!!
+pod 는        kubectl run webserver --image=httpd --port 80 /// kubectl apply -f pod-httpd.yaml /// kubectl create -f pod-httpd.yaml  이런 명령이 3개정도 있으면
+deployment 는 kubectl create deployment webserver --image=httpd --replicas=3 이렇게 명령됨 
+헷갈리지말기!
+delpoyment안에 pod가 들어감 pod는 제일 작은단위
+delpoyment는 24시간 계속 돌아가야됨 
 
