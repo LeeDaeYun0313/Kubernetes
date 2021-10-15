@@ -4,10 +4,10 @@ kubectl get pod -o wide //자세히
 kubectl scale deployment webserver --replicas=10  //10개로 늘림 pod를 스켈쥴러가 알아서 노드에 넣음
 watch kubectl get pod -o wide //실시간으로 pod보기가능
 
-kubectl cordon node1(노드이름) //더이상 포드들이 스케줄링하지 않는다 node1 배제 기존에node1에서 돌아가던 pod들은 그대로 돌아감   
-kubectl uncordon node1 //해제
+kubectl cordon node1(노드이름) //(스케줄링 중단)더이상 포드들이 스케줄링하지 않는다 node1 배제 기존에node1에서 돌아가던 pod들은 그대로 돌아감   
+kubectl uncordon node1 //(스케줄링 허용)다시 스케줄링가능해서 node1에 pod 배치가능
 
-kubectl drain node1(노드이름) 근데 바로안될거임
+kubectl drain node1(노드이름) // (노드 비우기)근데 바로안될거임
 kubectl drain node1(노드이름) --ignore-daemonsets //해주면 node1에있던 pod들은 다른 node2~3으로 이동함 , 이제 실행중인pod가없어서 시스템을 종료시키고, 필요한 하드웨어 교체나 운영체제업그레이드 가능
 
 kubectl delete node node2(노드이름)// 하면 kubectl get nodes로 확인하면 node2가 제거됨 
@@ -19,3 +19,5 @@ kubeadm join 10.0.0.10:6443 --token 여기다가복사 \
         --discovery-token-ca-cert-hash sha256:78ee85d8a6ea3097e62719bc3a217c88a72a5e4ef5a729359bb7ba7be93bba26
 
 --token ~~~~ 에만 붙여넣기해서 마스터에 연결할 node에서 join해주면 연결됨
+
+삭제한 node2를 다시 붙이려면 node2 쉘로가서 kubeadm reset 한번 실행하고 난후에 토큰 붙여넣어서 master랑 연동
