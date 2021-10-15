@@ -96,6 +96,10 @@ source <(kubectl completion bash)
 echo "source <(kubectl completion bash)" >> ~/.bashrc
 <<위에 2줄 한번에 복사  의미는 kubectl 명령어 자동완성 기능 활성화 
 
+source <(kubeadm completion bash)
+echo "source <(kubeadm completion bash)" >> ~/.bashrc
+<<위 명령줄과 같이 kubeadm 만 바뀌었습니다. kubeadm 에서 자동완성기능 사용가능
+
 
 8. 설치확인
 kubectl get nodes
