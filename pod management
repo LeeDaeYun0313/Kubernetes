@@ -90,7 +90,7 @@ kubectl describe pod multple-pod // 해서 컨테이너 2개가 들어간것 확
 웬만하면 web,was를 같은파드에 넣어쓰면 좋고 db는 따로 하나의 파드에서 사용하는게 좋음
 
 
-//label 
+//pod의 label
 kubectl lable pod appjs-pod app=web rel=stable //이런식으로 appjs-pod에 레이블(종류,버젼,프론트엔드,백엔드 등등) 넣는다.
 kubectl get pod --show-labels //명령어로 label 확인
 kubectl get pod -L app,rel //로도 확인가능
@@ -122,5 +122,35 @@ annotations:
   buildData:"20211018"
   imageRegistry:https://hub.docker.com/    //이런식으로 사용함
   
-  
+kubectl delete pod --all // pod 다지우기
+
+// node의 label
+// node마다 예를들어 ssd를 쓰는 node도 있고 gpu,마그네틱 을 쓰는 node도 있고 해서 label을 붙여서 눈으로 볼 수 있게 관리
+kubectl get nodes --show-labels  //node의 label 기
+kubectl label nodes node1(노드이름) gpu=true(그냥gpu를 사용한다는뜻)
+kubectl get nodes --show-labels //모든 레이블 다나옴 보기힘듬
+kubectl get nodes -L gpu // gpu옵션중심으로 화면에 나오게함
+
+
+yaml파일
+
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡtensorflow.yamlㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tensorflow-gpu
+spec:
+  nodeSelector:
+    gpu: "true"
+  containers:
+  - name: tensorflow
+    image: tensorflow/tensorflow:nightly-jupyter
+    ports:
+    - containerPort: 8888
+      protocol: TCP
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+//위와같이 spec:라인 밑에 nodeSelector을 넣어주어 그밑에 gpu 레이블을 넣어주어서 스케쥴러가 찾을 수 있게끔 yaml파일 수정후
+kubectl apply -f tensorflow.yaml //yaml파일 pod 실행
+
 
