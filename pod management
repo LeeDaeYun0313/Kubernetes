@@ -154,3 +154,80 @@ spec:
 kubectl apply -f tensorflow.yaml //yaml파일 pod 실행
 
 
+//pod Resources 제한 및 관리
+
+Resource Requests : pod를 실행하기 위한 최소 리소스 양을 지정(스케쥴링의 기준이됨)
+Resource Limits   : pod가 사용할 수 있는 최대 리소스 양을 지정
+
+ㅡㅡㅡㅡㅡㅡpod-nginx-request.yamlㅡㅡㅡㅡ
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: nginx
+  name: nginx-1
+spec:
+  containers:
+  - image: nginx:1.14
+    name: nginx
+    ports:
+    - containerPort: 80
+    resources:          //   이렇게해서 리소스에 requests 추가해서 메모리랑 cpu 최소양 기준 추가 (애플리케이션이 메모리랑,cpu가 이정도는 필요해!! 라는 것의 기준을 명시해준것)
+      requests:         //
+        memory: 500Mi   //
+        cpu: 200m       //
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+kubectl apply -f pod-nginx-request.yaml //해서 실행
+
+
+ㅡㅡㅡㅡㅡㅡㅡㅡpod-nginx-limit.yamlㅡㅡㅡㅡㅡㅡ
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: nginx
+  name: nginx-2
+spec:
+  containers:
+  - image: nginx:1.14
+    name: nginx
+    ports:
+    - containerPort: 80
+    resources:
+      limits:
+        memory: 500Mi
+        cpu: 200m
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+limits만 걸어줘도 
+kubectl describe pod nginx-2// 해서보면 limits만 걸어줬는데 requests도 걸려져있다.  현업에서는 limit과 requests를 함께 yaml에 수정해놓자!
+
+ㅡㅡㅡㅡㅡㅡwebui.yamlㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: nginx
+  name: web
+  labels:
+    app: web
+    release: stable
+    tier: frontend
+spec:
+  nodeSelector:
+    disktype: ssd
+  containers:
+  - image: nginx:1.14
+    name: nginx
+    ports:
+    - containerPort: 80
+    resources:
+      requests:
+        memory: 700Mi
+        cpu: 500m
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+이런식으로 만들면된다
+
+
