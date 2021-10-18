@@ -1,1 +1,47 @@
-a
+rc는 label을 기준으로 동작함 진짜중요! label만봄
+
+rc(ReplicationController)
+
+
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: rc-nginx
+spec:         // 이거 3개 띄워줘
+  replicas: 3 //
+  selector:   // 
+    app: web  
+  template:
+    metadata:
+      name: nginx-pod
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx:1.14
+
+지금현재 rc가 label이 app: web인것을 3개 띄울려고 고정시키는데 내가 자의로 지워도 다시 자동으로 생성됩니다 3개로 맞춰서
+만약 내가 다른 yaml파일에 label 에 app: web 을 넣어서 실행시키면 실행하는순간 바로죽어버린다 왜냐하면 rc가 label 이 app: web 인것을 3개만 띄우려고 명시해놔서
+
+또,내가 nginx웹서버 버전을 edit로 바꾸면 안바뀐다 왜냐하면 rc는 label만봐서 다른건 신경안쓴다. 하지만 현재 3개가 띄워져있고 하나를 삭제하면
+하나가 다시 뜰때는 바꾼 버전으로 pod가 실행된다.
+
+kubectl get rc //로 rc확인
+kubectl describe rc rc-nginx //자세히 rc확인
+
+현재 rc 가 3개실행중일때  rc이름은 re-nginx로 했을때
+kubectl scale rc rc-nginx --replicas=2 //하면 pod가 2개가됨
+
+kubectl edit rc rc-nginx //해서 replicas: 5 로 수정해주면 5개로 바뀜
+
+당연한말이지만 kubectl delete pod --all //하면 삭제되었다가 바로살아남 왜냐하면 rc는 rc가 관리하기때문임
+kubectl delete rc rc-nginx //해야 깨끗이 지워짐 
+
+
+
+
+
+
+
+
