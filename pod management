@@ -119,7 +119,7 @@ spec:
 annotations: 버젼이나,특정 정보전달할 용도로 사용함
 annotations:
   builder."daeyun@naver"
-  buildData:"2020202020"
+  buildData:"20211018"
   imageRegistry:https://hub.docker.com/    //이런식으로 사용함
   
   
