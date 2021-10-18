@@ -90,8 +90,37 @@ kubectl describe pod multple-pod // 해서 컨테이너 2개가 들어간것 확
 웬만하면 web,was를 같은파드에 넣어쓰면 좋고 db는 따로 하나의 파드에서 사용하는게 좋음
 
 
+//label 
+kubectl lable pod appjs-pod app=web rel=stable //이런식으로 appjs-pod에 레이블(종류,버젼,프론트엔드,백엔드 등등) 넣는다.
+kubectl get pod --show-labels //명령어로 label 확인
+kubectl get pod -L app,rel //로도 확인가능
+kubectl get pod --selecort app=web //레이블이 app=web 인것만 선택해서 확인
+kubectl lable pod appjs-pod app- //하면 app=web 레이블이 삭제됨
 
+label은 yaml파일 에서 수정하는것이 더 좋음
+ㅡㅡㅡㅡㅡㅡㅡapp-pod.yaml파일ㅡㅡㅡㅡㅡㅡㅡ
+apiVersion: v1
+kind: Pod
+metadata:
+  name: appjs-label
+  labels:                 //lable 위치는 metadata 아래에 구성됨 이렇게 적으면 됨
+    app: web              //
+    release: stable       //
+  annotations:                                 // annotations 이런식으로 사용
+    imageregistry:"https://hub.docker.com/"    //
+spec:
+  containers:
+  - name: appjs-container
+    image: smlinux/appjs
+    ports:
+    - containerPort: 8080
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 
-
-
+annotations: 버젼이나,특정 정보전달할 용도로 사용함
+annotations:
+  builder."daeyun@naver"
+  buildData:"2020202020"
+  imageRegistry:https://hub.docker.com/    //이런식으로 사용함
+  
+  
 
