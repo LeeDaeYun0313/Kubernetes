@@ -70,3 +70,27 @@ deployment 는 kubectl create deployment webserver --image=httpd --replicas=3 �
 delpoyment안에 pod가 들어감 pod는 제일 작은단위
 delpoyment는 24시간 계속 돌아가야됨 
 
+nginx이미지 잘못넣었을때
+kubectl edit deployments.apps webserver(pod이름)
+가서 이미지 고치기 
+
+kubectl get pods -o wide 해서 Name에 webserver-67asdasd-4cw2d 이런식으로 나오면 deployment로 만든것이고 
+                                    deployment-controller-pod 를 가리키는 것입니다.
+                         Name에 이름이 dasd같이 하나면 pod로 생성했다고 생각하면 된다           
+                                    
+pod expose deployment webserver --port=80  // lb만든다고 생각하면된다
+kubectl get service //하면 클러스터가 생성되고 ip하나가 생성되는데 이게 load-balance 라고 생각하면 된다 pod를 늘려줘도 자동으로 pod의 엔드포인트가 연결된다.
+
+//하나의 pod에 두개이상의 컨테이너 넣기
+기존에 만든 yaml 파일에 컨테이너 2개를 코드로넣고
+kubectl apply -f pod-multiple-container.yaml //-f 옵션은 파일 옵션 해서 yaml파일 생성해주고
+kubectl get pods //해서 생성된것 확인
+kubectl describe pod multple-pod // 해서 컨테이너 2개가 들어간것 확인 //그리고 같은 파드니까 같은 IP를 사용하고 같은 호스트네임 사용
+웬만하면 web,was를 같은파드에 넣어쓰면 좋고 db는 따로 하나의 파드에서 사용하는게 좋음
+
+
+
+
+
+
+
