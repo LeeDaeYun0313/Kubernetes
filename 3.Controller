@@ -165,7 +165,7 @@ spec:
  
  kubectl rollout undo deployment deploy-nginx-update(디플로이이름) //하면 전의 버전으로 돌아감
  
- kubectl rollout undo deployment deploy-nginx-update --to-revision 1 //하면 1번째 revision 히스토리로 돌아감 
+ kubectl rollout undo deployment deploy-nginx-update --to-revision 1 //하면 1번째 revision의 히스토리로 돌아감 
 
 
 
