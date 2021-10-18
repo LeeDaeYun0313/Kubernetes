@@ -1,4 +1,6 @@
-rc는 label을 기준으로 동작함 진짜중요! label만봄
+1-!!Controller!!!!!!!!!!!!!!!!
+
+rc는 label을 기준으로 동작함 진짜중요! 별별별별
 
 rc(ReplicationController)
 
@@ -39,8 +41,131 @@ kubectl edit rc rc-nginx //해서 replicas: 5 로 수정해주면 5개로 바뀜
 kubectl delete rc rc-nginx //해야 깨끗이 지워짐 
 
 
+2-!!ReplicaSet!!!!!!!!!!!!!!!!!
+RS rs
 
+ReplicaSet(rs) 은 rc보다 풍부한 selector 제공  
 
+selector:
+  matchLabels:
+    component: redis
+  matchExpressions:
+    -{key:tier,operator: In, values:[cache]}
+    -{key:environment,operator:NotIn,values:[dev]}
+    
+matchExpressions 연산자
+ 1.In: key와 value를 지정하여 key,value가 일치하는 pod만 연결
+ 2.Exists: key에 맞는 label의 pod를 연결
+ 3.NotIn
+ 4.DoesNotExist
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡrs-nginx.yamlㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: rs-nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:      // rc와다르게 rs는 matchLabels를 사용 하고 그밑에 app: 을넣음
+      app: web
+    matchExpressions:
+    - {key: version, operator: In, values: ["1.14", "1.15"]}        // rc와 다르게 rs는 다른버젼을 여러개 생성가능 !! 
+  template:
+    metadata:
+      name: nginx-pod
+      labels:
+        app: web
+        version: "1.14"
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx:1.14
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+rs는 rc의 상위호환 느낌
+
+!!3-Deployment 
+디플로이가 rs만들고 rs가 pod를 만든는것
+
+rs위에서 행동함 
+처음에 내가 nginx 1.14 3개생성하면 delpoyment 밑에 rs가 생성되서 rs밑에 pod3개가 생성됨 nginx-1.14버젼
+그런후 내가 ngunx 1.15 버젼으로 업데이트 하라고하면 Rolling update를함 Rolling update는 첫번째 rs의 pod를 하나죽이고
+두번째 rs를 생성해 1.15버젼으로 pod를 하나 생성하고 그후 첫번째 rs의 2번째 pod를 삭제하고 두번째 rs에 1.15버전 pod를 하나생성
+그런식으로 계속 진행
+
+그러니까 yaml파일이 rs와 deployment는 다를게 없다 kind는 종류니까 당연히 다른것이고~
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡdeploy-nginx.yamlmㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rs-nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:      
+      app: web
+    matchExpressions:
+    - {key: version, operator: In, values: ["1.14", "1.15"]}        
+  template:
+    metadata:
+      name: nginx-pod
+      labels:
+        app: web
+        version: "1.14"
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx:1.14
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+kubectl apply -f deploy-nginx.yaml //하면 pod 3개가 띄워지고
+kubectl set image deployment deploy-nginx nginx-container=nginx:1.15 --record //하면 1.14버전이 1.15버전으로 롤링업데이트된다
+
+kubectl rollout history deployment deploy-nginx //보면 처음만들었던기록, 두번째 업데이트했던기록 3번째 업데이트했던 기록이 나온다.
+
+kubectl rollout undo deployment deploy-nginx //이렇게 하면 바로 전단계로 돌아간다
+kubectl rollout undo deployment deploy-nginx --to-revision 2 //하면 2번째 기록되었던 버전으로 돌아간다.
+
+kubectl get rs //해보면 사용중이지않은rs들(이전 버젼의 pod 가지고있던 rs)이 나오고 현재 사용중인 rs들이 나온다.
+
+  //Rolling update
+    kubectl set image deployment <deploy_name> <container_name>=<new_version_image>
+  //RollBack
+    kubectl rollout history deployment <deploy_name>
+    kubectl rollout undo deploy <deploy_name>
+
+Annotation방법 record 상위호환
+Annotation
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡdeploy-update.yamlㅡㅡㅡㅡㅡ
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-nginx-update
+  annotations:                                // 여기에 히스토리가 담긴다
+    kubernetes.io/change-cause: version 1.14  // 
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      name: nginx-pod
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx:1.14                       //여기 이미지 버전을 바꿔준다 
+ ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+ 
+ 처음에 1.14버전을 설치하고  그후 vi 로 들어가서 annotations랑 image를 1.15로 바꿔주고 kubectl apply -f 디플로이 실행 시키면 히스토리도 남고 롤링업데이트되서 1.1.5버전으로 바뀜
+
+ kubectl rollout history deployment deploy-nginx-update(디플로이이름) //해서 히스토리 버전 확인가능
+ 
+ kubectl rollout undo deployment deploy-nginx-update(디플로이이름) //하면 전의 버전으로 돌아감
+ 
+ kubectl rollout undo deployment deploy-nginx-update --to-revision 1 //하면 1번째 revision 히스토리로 돌아감 
 
 
 
