@@ -77,7 +77,8 @@ kubectl edit deployments.apps webserver(pod이름)
 kubectl get pods -o wide 해서 Name에 webserver-67asdasd-4cw2d 이런식으로 나오면 deployment로 만든것이고 
                                     deployment-controller-pod 를 가리키는 것입니다.
                          Name에 이름이 dasd같이 하나면 pod로 생성했다고 생각하면 된다           
-                                    
+ 
+ //lb만들기 쿠버네티스에서는 cluster라고하고 lb ip를 cluster ip(단일진입점) 라고 생각하면된다. 자동으로 node안에있는 pod들의 ip를 연결함
 pod expose deployment webserver --port=80  // lb만든다고 생각하면된다
 kubectl get service //하면 클러스터가 생성되고 ip하나가 생성되는데 이게 load-balance 라고 생각하면 된다 pod를 늘려줘도 자동으로 pod의 엔드포인트가 연결된다.
 
