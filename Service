@@ -1,1 +1,67 @@
-a
+
+CNI 에는 weave도있고 aws~~ 도있고 calico 등등 엄청많은 cni가있는데 그중 하나 선택해서 사용하면 자동으로 네트워크가 구성된다.
+weave는 인프라 서로다른 ip가지고 통신할 수 있게해줌
+
+kubernetes Service는 lb처럼 서버들을 하나의 단일진입점을 만들어준다.
+
+쿠버네티스 서비스의 4가지 타입
+ClusterIP
+  -pod그룹의 단일 진입점 생성
+NodePort
+  -ClusterIp 가 생성된 후 
+  -모든 worker node에 외부에서 접속가능 한 포트가 예약
+LoadBalancer
+  -클라우드 인프라스트럭쳐(aws,gcp)나 오픈스택 클라우드에 적용
+  -LoadBalancer를 자동으로 프로 비전하는 기능 지원
+ExternalName
+  -클러스터 안에서 외부에 접속 시 사용할 도메인을 등록해서 사용
+  -클러스터 도메인이 실제 외부 도메인으로 치환되어 동작
+  
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡsvc.yamlㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+apiVersion: v1
+kind: Service
+metadata:
+  name: appjs-service
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: appjs
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+
+kubectl apply -f svc.yaml
+kubectl get service appjs-service //랜덤하게 만들어진 clusterIp 확인
+kubectl describe svc appjs-service  //하면 3개의 엔드포인트를 볼 수 있다. 엔드포인트 3개중에 하나를 접속하게 해준다는 뜻
+
+kubectl delete svc --all
+
+ㅡㅡㅡㅡsvc.yamlㅡㅡㅡ
+apiVersion: v1
+kind: Service
+metadata:
+  name: appjs-service
+spec:
+  type: ClusterIP
+  clusterIP: 10.100.100.100    //고정ip 잡음
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: appjs
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+
+kubectl apply -f svc.yaml
+kubectl get svc  // svc는 service 줄임말
+
+kubectl run web --image=httpd:2.2 --port 80 //을 만들어주고
+
+kubectl exec web -it -- /bin/bash    //로 접속해서
+  #apt install update
+  #apt install curl
+  #curl 10.100.100.100  // curl명령어로 확인해보면 연결이되고 clusterip로 잘 lb가 구현된다는 것을 확인가능하다.
+
+
+
+
