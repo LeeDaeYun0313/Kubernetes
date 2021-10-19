@@ -167,13 +167,14 @@ spec:
  
  kubectl rollout undo deployment deploy-nginx-update --to-revision 1 //하면 1번째 revision의 히스토리로 돌아감 
 
----------DaemonSet---------------------------
+---------DaemonSet-------------------------------------------
+
 DaemonSet  //현재 노드당 1개씩만 실행된다. ex)모니터링 에이전트 , 위브웍스 , 로그수집, 하드웨어 모니터링 등등 반드시 노드에 1개있으면서 무엇인가를 책임져야하는거 꼭 필요한 것.
 
 kubectl get pods -A // 숨겨진 pod 모두 보기
 kubectl get daemonsets.apps -A //데몬셋 돌아가는 pod 전체보기
 
-ㅡㅡㅡㅡㅡㅡㅡㅡㅡdaemonset-nginx.yamlㅡㅡㅡㅡㅡ
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡdaemonset-nginx.yamlㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -191,7 +192,7 @@ spec:
       containers:
       - name: nginx-container
         image: nginx:1.14
-ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 
 rs랑 비슷하게 selector matchlabels 들어간다 같음
 
@@ -205,16 +206,148 @@ kubectl get pods
 kubectl edit daemonset  ds-nginx //하고 nginx를 1.15버전으로 바꾸면 롤링업데이트가 자동으로된다.
 kubectl rollout undo daemonset ds-nginx //하면 롤링백 된다. 전에 했던 버전으로 돌아감
 
+----------StatefulSet------------------------------
+
+StatefulSet //은 파드의 이름을 보장해준다 ex) stabc-0, stabc-1,stabc-2
+// pod의 상태를 유지해주는 컨트롤러, pod이름, pod의 볼륨  
+pod는 고유한 id를 가지고 순서대로 실행된다.
+pod의 지속적인 상태를 유지
+ 1.pod name
+ 2.host name
+ 3.storage volume
+ 
+
+ㅡㅡㅡㅡㅡㅡst-nginx.yamlㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: st-nginx
+spec:
+  replicas: 3
+  serviceName: st-nginx-svc
+  selector:
+    matchLabels:
+      app: web
+    matchExpressions:
+    - {key: version, operator: In, values: ["1.14", "1.15"]}
+  template:
+    metadata:
+      name: nginx-pod
+      labels:
+        app: web
+        version: "1.14"
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx:1.14
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+
+kubectl apply -f rs-nginx.yaml  -f st-nginx.yaml //두개 실행
+kubectl edit statefulsets.apps st-nginx //1.15로 변경 nginx
+kubectl delete statefulsets.apps st-nginx //삭제
+kubectl delete replicasets.apps rs-nginx //삭제
+
+------------job---------------------------------------------------------------------------------------
+
+batch 처리하는 pod는 작업이 완료되면 종료됨.
+  작업이 완료되어도 pod가 제거되지는 않음
+  작업이 완료되는 시점이 중요한 서비스에 운용
+
+batch 처리에 적합한 컨트롤러로 pod의 성공적인 완료를 보장
+  pod 내의 컨테이너가 비정상 종료시 다시 실행
+  pod내의 컨테이너가 정상 종료시 완료
 
 
+job은 실행후 끝이나면 다시 실행되지않고 컴플리트 상태에 머문다. 
+job은 삭제되지않고 그대로 있는다 왜냐하면 로그정보 등등 확인을 위해서
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡjob-example.yamlㅡㅡㅡㅡㅡㅡ
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-example
+spec:
+  template:
+    spec:
+      containers:
+      - name: centos-container
+        image: centos:7
+        command: ["bash"]
+        args:
+        - "-c"
+        - "echo 'Hello World'; sleep 50; echo 'Bye'"
+      restartPolicy: Never
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+
+restartPolicy:
+   -OnFailure: 비정상 종료시 원래 실행 중 이던 노드에서 컨테이너 재시작
+   -Never : 비정상 종료 시 재시작을 막은 후 새로운 파드실행
+Parallel Jobs
+   -completions: Job 오브젝트로 실행할 pod 수
+   -parallelism: job에서 여러개의 pod를 동시에 실행
+
+위에 yaml 레이블은//spec: 안에 사용하면 된다
 
 
+yaml파일 실행하고나서 pod만 지우면 pod는 지워지는데 job컨트롤러는 동작중이다. 당연하게 컨트롤러를 삭제해야한다.
 
 
+kubectl get job //잡 확인
+kubectl delete job job-example //잡 컨트롤러 삭제
 
 
+--------cronjob----------------------------------------------------------
 
+job의 상위 
+job 오브젝트에 linux cronjob 의 스케중링 기능을 추가
+다음과 같은 자동화 작업에 유리
+   1.data backup
+   2.send email
+   3.cleaning tasks
+cronjob controller가 관리
 
+Cronjob Schedule: "0 3 1 * *" 0분 3시 1일 매월 요일전부 => 매월 1일 3시에
 
+분  시  일  월  요일
+
+0   5   *   *    0     --> 5시정각 일요일에 이 job을 실행
+
+* =all
+
+"*/5 * * * *" --> 5분마다 한 번씩 반복해서 실행
+
+"0  5  *  *  6" --> 매주 토요일 새벽 5시에 반복해서 실행
+
+ㅡㅡㅡㅡㅡㅡㅡㅡcronjon-example.yamlㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-example
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: busybox
+            command:
+            - /bin/sh
+            - -c
+            - date; echo Hello
+          restartPolicy: OnFailure
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+job에 schedule: "*/1 * * * *"
+        jobTemplate:
+        spec:
+3줄 추가
+
+실행하게되면 1분마다 자동으로 실행된다. job과 마찬가지로 pod가 완료되면 컴플리트 상태로 남아있다. 많이 남아있을 것이다.
+
+kubectl edit cronjobs.batch cronjob-example //해서 보면 limit제한이 있는데 3개라고 되어있을 것이다 그래서 최근 pod 3개만 남아있는다
 
 
