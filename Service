@@ -83,4 +83,44 @@ kubectl get svc // 서비스 확인
 
 web pod들을 하나로 묶어서 node의 포트 30100번을 열어줌
 
+kubectl apply -f rs-appjs.yaml //rs pod를 3개만든다 
+kubectl apply -f svc-appjs.yaml //service 생성 clusterIP가 생성되서 rs 의pod들을 하나의 엔드포인트로 묶는다 진입점을 묶는것임(알아서 로드발란스해줌)
+kubectl get svc
+kubectl describe svc appjs-service  //보면 rs pod의 엔드포인트 3개가 있음.
 
+clusterIP는 외부에서 접속안됨 외부에서 접속하려면 NodePort를 만들면 외부에서 접속가능함 NodePort만들면 clusterIP자동생성
+Nodeport를 생성해야 외부에서 접속되고 그포트는 30000~32767 사이를 쓰면된다. 
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: appjs-service-nodeport
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 8080
+    nodePort: 30123
+  selector:
+    app: appjs
+
+이런식으로 30123을 열어주어 node들의Ip를통해 웹에 접속하면된다 node1번ip가 10.0.0.1이고 node2번iprk 10.0.0.2면  웹에 10.0.0.1or2:30123 을해주면 접속된다.
+외부에서 접속하려면 aws에서 alb를 연결해서 node ip를 연결하면 접속가능
+node끼리 접속이되는이유는 weave를 설치해서 node끼리 서로 연결이된다.
+
+
+ㅡㅡㅡㅡㅡsvc-session.yamlㅡㅡㅡㅡ
+apiVersion: v1
+kind: Service
+metadata:
+  name: appjs-session
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: appjs
+  sessionAffinity: ClientIP                 //여기부분 추가했음 clusterIP Service에서
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+
+세션유지 ex)장바구니에 내가담은 물건들이 담겨있는데 lb가 다른 pod로 연결되어 내가담은 물건들이 없어지는 상황을 방지하기위해 세션유지를 이용해 한번 들어왔던 pod로 계속 유지되게하는 방법)
