@@ -167,6 +167,54 @@ spec:
  
  kubectl rollout undo deployment deploy-nginx-update --to-revision 1 //하면 1번째 revision의 히스토리로 돌아감 
 
+---------DaemonSet---------------------------
+DaemonSet  //현재 노드당 1개씩만 실행된다. ex)모니터링 에이전트 , 위브웍스 , 로그수집, 하드웨어 모니터링 등등 반드시 노드에 1개있으면서 무엇인가를 책임져야하는거 꼭 필요한 것.
+
+kubectl get pods -A // 숨겨진 pod 모두 보기
+kubectl get daemonsets.apps -A //데몬셋 돌아가는 pod 전체보기
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡdaemonset-nginx.yamlㅡㅡㅡㅡㅡ
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ds-nginx
+spec:
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      name: nginx-pod
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx:1.14
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+
+rs랑 비슷하게 selector matchlabels 들어간다 같음
+
+데몬셋은 노드하나 추가되면 데몬셋 자동실행되고 삭제하면 자동 삭제한다.
+당연하게 파드만 삭제하면 다시 실행된다. 삭제하려면 데몬셋을 삭제 해야한다.
+kubectl apply -f deamonset-nginx.yaml
+
+kubectl get daemonset.apps
+kubectl get pods
+
+kubectl edit daemonset  ds-nginx //하고 nginx를 1.15버전으로 바꾸면 롤링업데이트가 자동으로된다.
+kubectl rollout undo daemonset ds-nginx //하면 롤링백 된다. 전에 했던 버전으로 돌아감
+
+
+
+
+
+
+
+
+
+
+
 
 
 
