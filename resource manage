@@ -1,0 +1,149 @@
+limitRange
+ -네임스페이스에서 리소스 할당을 제한하는 정책
+ -default request and limit
+ -pod resource range
+ -container resource range
+ -storage resoirce range
+ 
+-리소스의 최소 및 최대 컴퓨팅 리소스 사용량을 설정
+-하나의 네임스페이스에 하나의 limitrange를 생성
+-제약조건을 위반하는 리소스는 API 서버에 대한 요청이 실패
+
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: limit-example
+spec:
+  limits:
+  - type: Pod  
+    min: 
+      cpu: 50m 
+      memory: 5Mi 
+    max: 
+      cpu: 1 
+      memory: 1Gi  
+  - type: Container 
+    defaultRequest: 
+      cpu: 100m 
+      memory: 10Mi  
+    default: 
+      cpu: 200m 
+      memory: 100Mi 
+    min: 
+      cpu: 50m 
+      memory: 5Mi 
+    max: 
+      cpu: 1 
+      memory: 1Gi 
+    maxLimitRequestRatio:
+      cpu: 4  
+      memory: 10 
+  - type: PersistentVolumeClaim 
+    min: 
+      storage: 1Gi 
+    max: 
+      storage: 10Gi
+
+
+kubectl apply -f limitrange.yaml  //실행
+kubectl get limitranges  //보기
+kubectl describe limitranges limit-example //자세히보기
+
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm 
+
+
+kubectl get namespaces //거의뭐 애저의 리소스그룹 느낌  안에있는 목록중 하나 날리면 그 네임스페이스안에 모든정보 날아감
+
+kubectl create namespace btc //btc 네임스페이스 생성  파트너사별로,회사별로
+
+kubectl apply -f appjs.yaml -n btc  //이렇게하면 appjs.yaml을 btc네임스페이스에서 동작하게 한다
+
+kubectl get pods,svc //둘다 볼 수있다.
+kubectl get pods,svc -n btc //btc네임스페이스에서 실행중인 pod,service 확인가능
+
+yaml파일에서 고정가능
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  namespace: btc     //이런식으로  yaml파일에 하는게 정석임 누구나 알 수 있기 때문에
+  name: appjs-rc
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: appjs
+    spec:
+      containers:
+      - image: smlinux/appjs
+        name: testcon
+        ports:
+        - containerPort: 8080
+
+
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
+
+Resource quota
+
+pod 리소스 제한 및 관리
+spec:
+  hard:
+    pods: 10
+    replicationcontrollers: 5
+    secrets: 10
+    등등
+    
+    
+
+
+과부하명령 limit memory가 500Mi 이고, 과부하 메모리양이 700Mi으로 설정하면 어떻게 될까요?
+
+  limits:
+            cpu: "1"
+            memory: "500Mi"
+          requests:
+            cpu: "0.5"
+            memory: "250Mi"
+        args:
+        - -cpus
+        - "1"
+        - -mem-total
+        - "700Mi"
+        - -mem-alloc-size
+        - "100Mi"
+        - -mem-alloc-sleep
+        - "1s"
+   
+   
+   
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stressful
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stress
+  template:
+    metadata:
+      labels:
+        app: stress
+    spec:
+      containers:
+      - image: smlinux/vish-stress
+        name: stress-container
+   
+
+
+
+
+
+
+
+
+
+
+
+
