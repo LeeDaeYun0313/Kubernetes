@@ -1,0 +1,30 @@
+정말 중요
+
+ingress 는
+service에 외부 URL을 제공
+트래픽을 로드밸런싱
+SSL/TLS terminate
+virtual hostiong을 지정
+
+
+wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.4/deploy/static/provider/baremetal/deploy.yaml     //ingress 컨트롤러
+
+vi deploy.yaml
+kubectl apply -f deploy.yaml 
+kubectl get pods -n ingress-nginx // 다른 네임스페이스에 작동해서 이렇게 봐야됨
+
+kubectl get namespaces  //네임스페이스 목록 확인가능
+
+kubectl config set-context ingress --cluster=kubernetes --user=kubernetes-admin --namespace=ingress-nginx  //ingress config정보 등록해줌
+
+kubectl config view
+kubectl config current-context  //현재 작업공간 확인
+kubectl config use-context ingress //ingress로 현재작업공간 바꾸기 
+kubectl get pods //하면 작업공간 바뀌어서 ingress의 pod들이 보임
+
+
+
+
+
+
+
