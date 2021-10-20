@@ -1,0 +1,86 @@
+web서버가 pod로 작동중 일때 건강체크 방법은 80번포트로 접근해서 200번 상태코드를 돌려주나? 확인
+db는 3306포트가 열려있나? 확인
+톰켓은 8080포트 확인
+
+
+!!! liveness Probe !!!  <<거의 필수적으로 들어감
+- 쿠버네티스는 pod를 안정적으로 유지하기 위해 liveness probe기능을 지원. liveness probe기능을 사용하면 서ㅗ비스가 가능한 컨테이너를 진단하고, 진단 결과 실패로 확인되면 컨테이너를 kill 시키고,
+다시 다운로드 받아 실행한다. 이것은 건강한 컨테이너를 통한 서비스를 지원한다.
+
+
+kubectl get pod nginx -o yaml  // nginx pod를 yaml로 보기
+ㅡㅡㅡㅡㅡㅡpod-liveness.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - image: nginx:1.14
+    name: nginx
+    ports:
+    - containerPort: 80
+    livenessProbe:      //livenessProbe
+      httpGet:
+        path: /
+        port: 80
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+
+ㅡㅡㅡㅡpod-unhealty.yamlㅡㅡ  건강하지않은 yaml파일 돌리기
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: liveness-pod
+spec:
+  containers:
+  - image: smlinux/unhealthy
+    name: unhealthy-container
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 8080
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+건강하지 않은 컨테이너를 만들어서 죽이고 다시 만드는지 kubectl describe pod liveness-pod 명령어로 검사가능
+
+!!!readiness Probe!!!  <<w
+
+
+
+ㅡㅡㅡdeploy-webui.yamlㅡㅡ
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      name: nginx-pod
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx:1.14
+        readinessProbe:     //
+          exec:             //
+            command:    
+            - ls
+            - /tmp/datafile
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+
+tmp밑에 데이터파일 이 있으면 건강 없으면 건강하지않음  지금은 없으니까 무조건 건강하지 않다고 나올거임
+READY상태가 0/1로 되어있음
+kubectl exec deploy-nginx-66c57bd6d5-pccd2 -- touch /tmp/datafile //이렇게 컨테이너에 /tmp/datafile을 만들어주면 바로 1/1로 바뀜 건강하다는 뜻
+
+
+
+
+
+
+
