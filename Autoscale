@@ -15,17 +15,65 @@ HPA
 
 
 
-Metrics-Server설치
+Metrics-Server설치 --각 파드와 노드의 사용량을 모니터링 하고 api를 통해 볼 수 있게 제공  HPA할때 필수로 설치해야함
 
-git clone 사이트url
+
+git clone https://github.com/237summit/kubernetes-metrics-server.git
 
 해당 디렉토리 이동후
 kubectl apply -f . //현재디렉토리에 있는것 다실행
 
+오류나면
+
+vi auth-delegator.yaml 
+vi auth-reader.yaml 
+vi metrics-apiservice.yaml 
+apiVersion: rbac.authorization.k8s.io/v1
+으로고치기
+
+ㅡㅡㅡㅡㅡphp-apache.yamlㅡㅡㅡㅡ
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-apache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - image: smlinux/hpa-example
+        name: c1
+        ports:
+        - containerPort: 80
+        resources: 
+          requests: 
+            cpu: 200m  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-apache
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: web
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 
 
+HPA실행 커멘트 : kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10
+yaml파일 p.241쪽에 있음
 
+kubectl get hpa  //hpa 확인
 
+kubectl get pod -A //모든(네임스페이스 상관없이) 실행중인 파드 보기
 
 
 
