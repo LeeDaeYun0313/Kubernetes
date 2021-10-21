@@ -1,0 +1,74 @@
+
+롤링업데이트는 빠르게 롤링업데이트하고
+카나리는 하나씩 하나씩 운영상태 체크하면서 차근차근 업데이트해나감
+블루-그린 은 신버전을 새로 만들어놓고 구버전을 신버전으로 방향을 바꿔버림 빠름
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mainui-stable
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mainui
+      version: stable
+  template:
+    metadata:
+      labels:
+        app: mainui
+        version: stable
+    spec:
+      containers:
+      - name: mainui
+        image: nginx:1.14
+        ports:
+        - containerPort: 80
+
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mainui-svc
+spec:
+  selector:
+    app: mainui
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+
+
+카나리!
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mainui-canary
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mainui
+      version: canary
+  template:
+    metadata:
+      labels:
+        app: mainui
+        version: canary
+    spec:
+      containers:
+      - name: mainui
+        image: nginx:1.15
+        ports:
+        - containerPort: 80
+
+
+
+
+
+
+
+
+
